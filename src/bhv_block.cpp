@@ -155,9 +155,9 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
         distY = min(1.0, distY * 0.25);
         distY = 1;
         if (wm.self().pos().absY() < point.absY()) {
-            *rate = point.absY() * distY;
+            *rate += point.absY() * distY;
         } else {
-            *rate = -point.absY() * distY;
+            *rate -= point.absY() * distY;
         }
         *rate -= point.x;
 
