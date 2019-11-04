@@ -142,12 +142,8 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
 
     if (point.dist(goal) < 40) {
         *rate += max(0.0, 40.0 - point.dist(goal));
-    } else {
-        if (point.absY() > ServerParam::i().pitchHalfWidth() - 4)
-            return true;
+    } else if(wm.self().pos().dist(point) <= 5){
         if (point.absY() < ServerParam::i().penaltyAreaHalfWidth())
-            return true;
-        if (wm.self().pos().dist(point) > 5)
             return true;
         if (abs(wm.self().pos().absY() - point.absY()) < 1)
             return true;
@@ -155,9 +151,9 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
         distY = min(1.0, distY * 0.25);
         distY = 1;
         if (wm.self().pos().absY() < point.absY()) {
-            *rate += point.absY() * distY;
+            *rate = point.absY() * distY;
         } else {
-            *rate -= point.absY() * distY;
+            *rate = -point.absY() * distY;
         }
         *rate -= point.x;
 
