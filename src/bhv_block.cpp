@@ -142,7 +142,6 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
 
     if (point.dist(goal) < 40) {
         *rate += max(0.0, 40.0 - point.dist(goal));
-        dlog.addText(Logger::CLEAR, __FILE__"go to goal");
     } else {
         if (point.absY() > ServerParam::i().pitchHalfWidth() - 4)
             return true;
