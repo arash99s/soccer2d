@@ -75,7 +75,7 @@ Bhv_BasicMove::execute(PlayerAgent *agent) {
     const int mate_min = wm.interceptTable()->teammateReachCycle();
     const int opp_min = wm.interceptTable()->opponentReachCycle();
     if (!wm.existKickableTeammate()
-        && (self_min <= 2
+        && (self_min <= 3
             || (self_min <= mate_min
                 && self_min < opp_min + 1)
         )
