@@ -92,10 +92,7 @@ bhv_block::execute(PlayerAgent *agent) {
 bool
 bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
     const int opp_min = wm.interceptTable()->opponentReachCycle();
-    if (wm.self().distFromBall() < 2 && wm.self().pos().x < wm.ball().pos().x) {
-        *predict = wm.ball().inertiaPoint(opp_min);
-        return true;
-    }
+
     int n = 60;
     vector<Vector2D> nodes;
     vector<double> rateNodes;
@@ -158,9 +155,9 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
         *rate -= point.x;
 
     }
-    if (point.absY() > ServerParam::i().pitchHalfWidth()
-        || point.absX() > ServerParam::i().pitchHalfLength() - 2) {
-        *rate -= 100;////OUT
+    if (point.absY() > ServerParam::i().pitchHalfWidth() - 1
+        || point.absX() > ServerParam::i().pitchHalfLength() - 1) {
+        *rate -= 300;////OUT
     }
 
     return true;

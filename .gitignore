@@ -111,6 +111,8 @@ fabric.properties
 *.o
 Makefile
 config.log
+src/*.o
+src/sample_player
 config.status
 src/Makefile
 src/start.sh
