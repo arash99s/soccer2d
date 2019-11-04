@@ -1,0 +1,3 @@
+/home/arash/Desktop/soccer2d-arash/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/arash/Desktop/soccer2d-arash/cmake-build-debug/CMakeFiles/soccer2d.dir
+/home/arash/Desktop/soccer2d-arash/cmake-build-debug/CMakeFiles/edit_cache.dir
