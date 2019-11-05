@@ -19,6 +19,9 @@
 
 #include "neck_offensive_intercept_neck.h"
 
+#define GENERATE_CIRCLE_TO_PREDICT
+#define DLOG_FOR_TARGET_POINT
+
 using namespace rcsc;
 using namespace std;
 
@@ -42,10 +45,6 @@ bhv_block::execute(PlayerAgent *agent) {
     }
 
 
-    dlog.addText(Logger::CLEAR, __FILE__"opponent pass is :%d", opponent_pass);
-    dlog.addText(Logger::CLEAR, __FILE__"opponent cycle :%d", wm.interceptTable()->opponentReachCycle());
-
-
     if (opponent_pass && !doPredict(wm, fastest_opponent.pos(), &predict))
         return false;
     if (!opponent_pass && !doPredict(wm, wm.ball().inertiaPoint(opp_min), &predictInertia))
@@ -66,6 +65,7 @@ bhv_block::execute(PlayerAgent *agent) {
     double dist_thr = wm.ball().distFromSelf() * 0.1;
     if (dist_thr < 1.0) dist_thr = 1.0;
 
+#ifdef DLOG_FOR_TARGET_POINT
     dlog.addText(Logger::TEAM,
                  __FILE__": Bhv_BasicMove target=(%.1f %.1f) dist_thr=%.2f",
                  target_point.x, target_point.y,
@@ -74,6 +74,7 @@ bhv_block::execute(PlayerAgent *agent) {
     agent->debugClient().addMessage("BasicMove%.0f", dash_power);
     agent->debugClient().setTarget(target_point);
     agent->debugClient().addCircle(target_point, dist_thr);
+#endif
 
     if (!Body_GoToPoint(target_point, dist_thr, dash_power
     ).execute(agent)) {
@@ -121,7 +122,9 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
         *predict = nodes.at(maxNode);
         return true;
     } else {
+#ifdef GENERATE_CIRCLE_TO_PREDICT
         dlog.addCircle(Logger::CLEAR, nodes.at(maxNode), 0.2, "blue");
+#endif
         return doPredict(wm, nodes.at(maxNode), predict);
     }
 
@@ -142,15 +145,17 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
     } else if(wm.self().pos().dist(point) <= 5){
         if (point.absY() < ServerParam::i().penaltyAreaHalfWidth())
             return true;
-        if (abs(wm.self().pos().absY() - point.absY()) < 1)
+        if (abs(wm.self().pos().absY() - point.absY()) < 1.5)
             return true;
         double distY = abs(wm.self().pos().absY() - point.absY());
         distY = min(1.0, distY * 0.25);
         distY = 1;
         if (wm.self().pos().absY() < point.absY()) {
             *rate = point.absY() * distY;
+            dlog.addText(Logger::CLEAR , __FILE__" go to out ");
         } else {
             *rate = -point.absY() * distY;
+            dlog.addText(Logger::CLEAR , __FILE__" go to in ");
         }
         *rate -= point.x;
 
