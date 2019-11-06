@@ -30,7 +30,7 @@ bhv_block::execute(PlayerAgent *agent) {
     const WorldModel &wm = agent->world();
     const int opp_min = wm.interceptTable()->opponentReachCycle();
     opponent_pass = false;
-    Vector2D target_point;
+    static Vector2D target_point;
     PlayerObject fastest_opponent = *wm.interceptTable()->fastestOpponent();
     Vector2D predict, predictInertia;
 
@@ -46,14 +46,9 @@ bhv_block::execute(PlayerAgent *agent) {
         opponent_pass = true;
     }
 
-
-//    if (opponent_pass && !doPredict(wm, fastest_opponent.pos(), &predict))
-//        return false;
-//    if (!opponent_pass && !doPredict(wm, wm.ball().inertiaPoint(opp_min), &predictInertia))
-//        return false;
     int real_opp_min = opp_min;
     if(opponent_pass){
-        real_opp_min += opp_min/2;
+        real_opp_min += opp_min/2 - 1;
     }
 
     if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia))
@@ -62,12 +57,6 @@ bhv_block::execute(PlayerAgent *agent) {
     if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().pitchHalfWidth() + 1
         || wm.ball().inertiaPoint(opp_min).absX() > ServerParam::i().pitchHalfLength() + 1) {
         predictInertia = wm.interceptTable()->fastestOpponent()->pos();
-    }
-
-    if (opponent_pass) {
-        target_point = predict;
-    } else {
-        target_point = predictInertia;
     }
 
     target_point = predictInertia;
@@ -165,10 +154,8 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
         distY = 1;
         if (wm.self().pos().absY() < point.absY()) {
             *rate = point.absY() * distY;
-            dlog.addText(Logger::CLEAR , __FILE__" go to out ");
         } else {
             *rate = -point.absY() * distY;
-            dlog.addText(Logger::CLEAR , __FILE__" go to in ");
         }
         *rate -= point.x;
 

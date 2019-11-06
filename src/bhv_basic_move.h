@@ -30,6 +30,7 @@
 #include <rcsc/geom/vector_2d.h>
 #include <rcsc/player/soccer_action.h>
 #include <rcsc/player/world_model.h>
+#include "bhv_block.h"
 
 class Bhv_BasicMove
         : public rcsc::SoccerBehavior {
@@ -43,7 +44,7 @@ private:
 
     void goToFormation(rcsc::PlayerAgent *agent);
 
-    bool isNearestToBallInertia(const rcsc::WorldModel &wm);
+    bool isNearestToBallInertia(const rcsc::WorldModel &wm , bhv_block block);
 };
 
 #endif

@@ -16,9 +16,10 @@ public:
 
     bool execute(rcsc::PlayerAgent *agent);
 
-private:
     bool doPredict(const rcsc::WorldModel &wm, rcsc::Vector2D center, rcsc::Vector2D *predict);
 
+
+private:
     bool rateThisPoint(const rcsc::WorldModel &wm, rcsc::Vector2D point, double *rate);
 
     int cycle_opponent = 0;

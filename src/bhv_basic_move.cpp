@@ -92,7 +92,7 @@ Bhv_BasicMove::execute(PlayerAgent *agent) {
         goToFormation(agent);
         return true;
     }
-    if (!isNearestToBallInertia(wm)) {
+    if (!isNearestToBallInertia(wm, block)) {
         goToFormation(agent);
         return true;
     }
@@ -138,7 +138,7 @@ Bhv_BasicMove::goToFormation(PlayerAgent *agent) {
 
 /*-------------------------------------------------------------------*/
 bool
-Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm) {
+Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm, bhv_block block) {
     const int opp_min = wm.interceptTable()->opponentReachCycle();
     const ServerParam &SP = ServerParam::i();
     Vector2D goal = Vector2D(-SP.pitchHalfLength(), 0);
@@ -176,19 +176,25 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm) {
             minimum_player1 = i;
         }
     }
+    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player, minimum);
+    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1, minimum1);
 
-    if(abs(minimum - minimum1)<2.5){
-        minimum += wm.ourPlayer(minimum_player)->distFromBall();
-        minimum1 += wm.ourPlayer(minimum_player1)->distFromBall();
-        if(abs(minimum - minimum1)<2.5) {
-            if (minimum_player1 < minimum_player) {
+    if (abs(minimum - minimum1) < 2.5) {
+        Vector2D predict;
+        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict))
+            return false;
+        minimum += wm.ourPlayer(minimum_player)->pos().dist(predict);
+        minimum1 += wm.ourPlayer(minimum_player1)->pos().dist(predict);
+        dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player, minimum);
+        dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1, minimum1);
+        if (abs(minimum - minimum1) < 5) {
+            if (wm.ourPlayer(minimum_player1)->pos().dist(goal) < wm.ourPlayer(minimum_player)->pos().dist(goal)) {
                 minimum_player = minimum_player1;
             }
         }
     }
-    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player , minimum);
-    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1 , minimum1);
-    dlog.addText(Logger::CLEAR, __FILE__"realy must be block: %d = %f", minimum_player , minimum);
+
+    dlog.addText(Logger::CLEAR, __FILE__"realy must be block: %d", minimum_player);
 
     return minimum_player == wm.self().unum();
 }
