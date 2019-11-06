@@ -29,7 +29,7 @@ bool
 bhv_block::execute(PlayerAgent *agent) {
     const WorldModel &wm = agent->world();
     const int opp_min = wm.interceptTable()->opponentReachCycle();
-    bool opponent_pass = false;
+    opponent_pass = false;
     Vector2D target_point;
     PlayerObject fastest_opponent = *wm.interceptTable()->fastestOpponent();
     Vector2D predict, predictInertia;
@@ -51,8 +51,12 @@ bhv_block::execute(PlayerAgent *agent) {
 //        return false;
 //    if (!opponent_pass && !doPredict(wm, wm.ball().inertiaPoint(opp_min), &predictInertia))
 //        return false;
+    int real_opp_min = opp_min;
+    if(opponent_pass){
+        real_opp_min += opp_min/2;
+    }
 
-    if (!doPredict(wm, wm.ball().inertiaPoint(opp_min), &predictInertia))
+    if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia))
         return false;
 
     if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().pitchHalfWidth() + 1
@@ -128,7 +132,11 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
 
     double my_speed = 0.92;
     double my_cycle = wm.self().pos().dist(nodes.at(maxNode)) / my_speed;
-    if (my_cycle <= cycle_opponent + opp_min) {
+    int predict_opp_min = opp_min;
+    if(opponent_pass){
+        predict_opp_min -= opp_min/2;
+    }
+    if (my_cycle <= cycle_opponent + predict_opp_min) {
         *predict = nodes.at(maxNode);
         return true;
     } else {

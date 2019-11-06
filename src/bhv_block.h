@@ -22,6 +22,8 @@ private:
     bool rateThisPoint(const rcsc::WorldModel &wm, rcsc::Vector2D point, double *rate);
 
     int cycle_opponent = 0;
+
+    bool opponent_pass = false;
 };
 
 
