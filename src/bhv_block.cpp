@@ -47,8 +47,11 @@ bhv_block::execute(PlayerAgent *agent) {
     }
 
     int real_opp_min = opp_min;
-    if(opponent_pass){
-        real_opp_min += opp_min/2 - 1;
+    if(opponent_pass && opp_min != 1){
+        real_opp_min += opp_min/2;
+        if(opp_min > 6){
+            real_opp_min -= 1;
+        }
     }
 
     if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia))
