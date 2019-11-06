@@ -107,12 +107,11 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
 
     int n = 60;
     vector<Vector2D> nodes;
-    //vector<double> rateNodes;
     double alfa = 360.0 / n;
     double maxRate = -1000;
     int maxNode = 0;
 
-    for (int i = 0; i < n; i++) {
+    for (int i = n/4; i <= (3*n)/4; i++) {
         nodes.push_back(Vector2D(center.x, center.y) + Vector2D::polar2vector(0.7, i * alfa));
         double rate;
         if (!rateThisPoint(wm, nodes.at(i), &rate)) {
@@ -123,7 +122,6 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
             maxRate = rate;
             maxNode = i;
         }
-        //rateNodes.push_back(rate);
     }
 #ifdef GENERATE_CIRCLE_TO_PREDICT
     dlog.addCircle(Logger::CLEAR, nodes.at(maxNode), 0.2, "blue");
