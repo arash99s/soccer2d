@@ -2,12 +2,21 @@
 *.o
 Makefile
 config.log
-src/*.o
 src/sample_player
 
 config.status
 src/Makefile
 src/start.sh
+
+src/.deps/sample_player-role_center_back.Po
+src/.deps/sample_player-role_center_forward.Po
+src/.deps/sample_player-role_defensive_half.Po
+src/.deps/sample_player-role_offensive_half.Po
+src/.deps/sample_player-role_sample.Po
+src/.deps/sample_player-role_side_back.Po
+src/.deps/sample_player-role_side_forward.Po
+src/.deps/sample_player-role_side_half.Po
+
 
 ### CLion ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
