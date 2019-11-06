@@ -40,14 +40,17 @@ bhv_block::execute(PlayerAgent *agent) {
         return false;
 
 
-    if (wm.ball().inertiaPoint(opp_min).x > fastest_opponent.pos().x) {
+    if (wm.ball().pos().x > fastest_opponent.pos().x + 1) {
         opponent_pass = true;
     }
 
 
-    if (opponent_pass && !doPredict(wm, fastest_opponent.pos(), &predict))
-        return false;
-    if (!opponent_pass && !doPredict(wm, wm.ball().inertiaPoint(opp_min), &predictInertia))
+//    if (opponent_pass && !doPredict(wm, fastest_opponent.pos(), &predict))
+//        return false;
+//    if (!opponent_pass && !doPredict(wm, wm.ball().inertiaPoint(opp_min), &predictInertia))
+//        return false;
+
+    if (!doPredict(wm, wm.ball().inertiaPoint(opp_min), &predictInertia))
         return false;
 
     if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().pitchHalfWidth() + 1
@@ -60,6 +63,8 @@ bhv_block::execute(PlayerAgent *agent) {
     } else {
         target_point = predictInertia;
     }
+
+    target_point = predictInertia;
 
     double dash_power = ServerParam::i().maxDashPower();
     double dist_thr = wm.ball().distFromSelf() * 0.1;
@@ -80,9 +85,9 @@ bhv_block::execute(PlayerAgent *agent) {
     ).execute(agent)) {
         Body_TurnToBall().execute(agent);
     }
-    if (opponent_pass) {
-        agent->setViewAction(new View_Wide());
-    }
+//    if (opponent_pass) {
+//        agent->setViewAction(new View_Wide());
+//    }
     agent->setNeckAction(new Neck_TurnToBall());
 
     return true;
@@ -96,7 +101,7 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
 
     int n = 60;
     vector<Vector2D> nodes;
-    vector<double> rateNodes;
+    //vector<double> rateNodes;
     double alfa = 360.0 / n;
     double maxRate = -1000;
     int maxNode = 0;
@@ -112,8 +117,11 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
             maxRate = rate;
             maxNode = i;
         }
-        rateNodes.push_back(rate);
+        //rateNodes.push_back(rate);
     }
+#ifdef GENERATE_CIRCLE_TO_PREDICT
+    dlog.addCircle(Logger::CLEAR, nodes.at(maxNode), 0.2, "blue");
+#endif
     cycle_opponent++;
 
     double my_speed = 0.92;
@@ -122,9 +130,6 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
         *predict = nodes.at(maxNode);
         return true;
     } else {
-#ifdef GENERATE_CIRCLE_TO_PREDICT
-        dlog.addCircle(Logger::CLEAR, nodes.at(maxNode), 0.2, "blue");
-#endif
         return doPredict(wm, nodes.at(maxNode), predict);
     }
 
@@ -135,14 +140,14 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
 bool
 bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
     Vector2D goal = Vector2D(-ServerParam::i().pitchHalfLength(), 0);
-    *rate = 200 - point.x;
+    *rate = 400 + 200 - point.x;
     if (point.absY() > ServerParam::i().penaltyAreaHalfWidth()) {
-        *rate = -3 * point.x;
+        *rate = 400 -3 * point.x;
     }
 
     if (point.dist(goal) < 40) {
         *rate += max(0.0, 40.0 - point.dist(goal));
-    } else if(wm.self().pos().dist(point) <= 5){
+    } else if(wm.self().pos().dist(point) <= 8){
         if (point.absY() < ServerParam::i().penaltyAreaHalfWidth())
             return true;
         if (abs(wm.self().pos().absY() - point.absY()) < 1.5)

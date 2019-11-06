@@ -151,7 +151,7 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm) {
             continue;
 
         double m = wm.ourPlayer(i)->pos().dist(ball);
-        m += wm.ourPlayer(i)->pos().x / 2;
+        m += wm.ourPlayer(i)->pos().x / 3;
         if (ball.absY() < SP.penaltyAreaHalfWidth() && ball.x < (-SP.pitchHalfLength() + SP.penaltyAreaLength())) {
             m += wm.ourPlayer(i)->pos().dist(goal);
         }
@@ -160,6 +160,30 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm) {
             minimum_player = i;
         }
     }
-    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d", minimum_player);
+    double minimum1 = 1000;
+    int minimum_player1 = 0;
+    for (int i = 2; i <= 11; i++) {
+        if (wm.ourPlayer(i) == NULL || wm.ourPlayer(i)->unum() < 0)
+            continue;
+
+        double m = wm.ourPlayer(i)->pos().dist(ball);
+        m += wm.ourPlayer(i)->pos().x / 3;
+        if (ball.absY() < SP.penaltyAreaHalfWidth() && ball.x < (-SP.pitchHalfLength() + SP.penaltyAreaLength())) {
+            m += wm.ourPlayer(i)->pos().dist(goal);
+        }
+        if (m < minimum1 && m > minimum) {
+            minimum1 = m;
+            minimum_player1 = i;
+        }
+    }
+    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player , minimum);
+    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1 , minimum1);
+
+    if(abs(minimum - minimum1)<2.5){
+        if(minimum_player1 < minimum_player){
+            minimum_player = minimum_player1;
+        }
+    }
+    dlog.addText(Logger::CLEAR, __FILE__"realy must be block: %d = %f", minimum_player , minimum);
     return minimum_player == wm.self().unum();
 }
