@@ -179,7 +179,7 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm, bhv_block block) {
     dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player, minimum);
     dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1, minimum1);
 
-    if (abs(minimum - minimum1) < 2.5) {
+    if (abs(minimum - minimum1) < 3) {
         Vector2D predict;
         if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict))
             return false;
@@ -187,10 +187,16 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm, bhv_block block) {
         minimum1 += wm.ourPlayer(minimum_player1)->pos().dist(predict);
         dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player, minimum);
         dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1, minimum1);
-        if (abs(minimum - minimum1) < 5) {
-            if (wm.ourPlayer(minimum_player1)->pos().dist(goal) < wm.ourPlayer(minimum_player)->pos().dist(goal)) {
+        if (abs(minimum - minimum1) < 3.5) {
+            double dist_goal1 = wm.ourPlayer(minimum_player1)->pos().dist(goal);
+            double dist_goal = wm.ourPlayer(minimum_player)->pos().dist(goal);
+            if (abs(dist_goal - dist_goal1) > 2 &&  dist_goal1 < dist_goal && 0) {
+                minimum_player = minimum_player1;
+            }else if(minimum_player1 < minimum_player){
                 minimum_player = minimum_player1;
             }
+        }else if(minimum1 < minimum){
+            minimum_player = minimum_player1;
         }
     }
 

@@ -34,7 +34,7 @@ bhv_block::execute(PlayerAgent *agent) {
     PlayerObject fastest_opponent = *wm.interceptTable()->fastestOpponent();
     Vector2D predict, predictInertia;
 
-    dlog.addText(Logger::CLEAR , __FILE__" opp_min is : %d", opp_min);
+    dlog.addText(Logger::CLEAR, __FILE__" opp_min is : %d", opp_min);
 
     if (wm.interceptTable()->fastestOpponent() == NULL)
         return false;
@@ -47,9 +47,9 @@ bhv_block::execute(PlayerAgent *agent) {
     }
 
     int real_opp_min = opp_min;
-    if(opponent_pass && opp_min != 1){
-        real_opp_min += opp_min/2;
-        if(opp_min > 6){
+    if (opponent_pass && opp_min != 1) {
+        real_opp_min += opp_min / 2;
+        if (opp_min > 6) {
             real_opp_min -= 1;
         }
     }
@@ -103,16 +103,16 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
     double maxRate = -1000;
     int maxNode = 0;
 
-    for (int i = n/4; i <= (3*n)/4; i++) {
+    for (int i = n / 4; i <= (3 * n) / 4; i++) {
         nodes.push_back(Vector2D(center.x, center.y) + Vector2D::polar2vector(0.7, i * alfa));
         double rate;
-        if (!rateThisPoint(wm, nodes.at(i-n/4), &rate)) {
+        if (!rateThisPoint(wm, nodes.at(i - n / 4), &rate)) {
             *predict = center;
             return true;
         }
         if (maxRate < rate) {
             maxRate = rate;
-            maxNode = i - n/4;
+            maxNode = i - n / 4;
         }
     }
 #ifdef GENERATE_CIRCLE_TO_PREDICT
@@ -123,8 +123,8 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
     double my_speed = 0.92;
     double my_cycle = wm.self().pos().dist(nodes.at(maxNode)) / my_speed;
     int predict_opp_min = opp_min;
-    if(opponent_pass){
-        predict_opp_min -= opp_min/2;
+    if (opponent_pass) {
+        predict_opp_min -= opp_min / 2;
     }
     if (my_cycle <= cycle_opponent + predict_opp_min) {
         *predict = nodes.at(maxNode);
@@ -142,12 +142,12 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
     Vector2D goal = Vector2D(-ServerParam::i().pitchHalfLength(), 0);
     *rate = 400 + 200 - point.x;
     if (point.absY() > ServerParam::i().penaltyAreaHalfWidth()) {
-        *rate = 400 -3 * point.x;
+        *rate = 400 - 3 * point.x;
     }
 
     if (point.dist(goal) < 40) {
         *rate += max(0.0, 40.0 - point.dist(goal));
-    } else if(wm.self().pos().dist(point) <= 8){
+    } else if (wm.self().pos().dist(point) <= 8) {
         if (point.absY() < ServerParam::i().penaltyAreaHalfWidth())
             return true;
         if (abs(wm.self().pos().absY() - point.absY()) < 1.5)
