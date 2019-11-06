@@ -176,14 +176,19 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm) {
             minimum_player1 = i;
         }
     }
-    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player , minimum);
-    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1 , minimum1);
 
     if(abs(minimum - minimum1)<2.5){
-        if(minimum_player1 < minimum_player){
-            minimum_player = minimum_player1;
+        minimum += wm.ourPlayer(minimum_player)->distFromBall();
+        minimum1 += wm.ourPlayer(minimum_player1)->distFromBall();
+        if(abs(minimum - minimum1)<2.5) {
+            if (minimum_player1 < minimum_player) {
+                minimum_player = minimum_player1;
+            }
         }
     }
+    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player , minimum);
+    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1 , minimum1);
     dlog.addText(Logger::CLEAR, __FILE__"realy must be block: %d = %f", minimum_player , minimum);
+
     return minimum_player == wm.self().unum();
 }
