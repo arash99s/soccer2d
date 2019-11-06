@@ -114,13 +114,13 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
     for (int i = n/4; i <= (3*n)/4; i++) {
         nodes.push_back(Vector2D(center.x, center.y) + Vector2D::polar2vector(0.7, i * alfa));
         double rate;
-        if (!rateThisPoint(wm, nodes.at(i), &rate)) {
+        if (!rateThisPoint(wm, nodes.at(i-n/4), &rate)) {
             *predict = center;
             return true;
         }
         if (maxRate < rate) {
             maxRate = rate;
-            maxNode = i;
+            maxNode = i - n/4;
         }
     }
 #ifdef GENERATE_CIRCLE_TO_PREDICT
