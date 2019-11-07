@@ -151,7 +151,7 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm, bhv_block block) {
             continue;
 
         double m = wm.ourPlayer(i)->pos().dist(ball);
-        m += wm.ourPlayer(i)->pos().x / 3;
+        m += wm.ourPlayer(i)->pos().x /2.5;
         if (ball.absY() < SP.penaltyAreaHalfWidth() && ball.x < (-SP.pitchHalfLength() + SP.penaltyAreaLength())) {
             m += wm.ourPlayer(i)->pos().dist(goal);
         }
@@ -167,7 +167,7 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm, bhv_block block) {
             continue;
 
         double m = wm.ourPlayer(i)->pos().dist(ball);
-        m += wm.ourPlayer(i)->pos().x / 3;
+        m += wm.ourPlayer(i)->pos().x / 2.5;
         if (ball.absY() < SP.penaltyAreaHalfWidth() && ball.x < (-SP.pitchHalfLength() + SP.penaltyAreaLength())) {
             m += wm.ourPlayer(i)->pos().dist(goal);
         }
@@ -184,7 +184,7 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm, bhv_block block) {
 
     if (abs(minimum - minimum1) < 5) {
         Vector2D predict;
-        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict))
+        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict , false))
             return false;
         minimum += wm.ourPlayer(minimum_player)->pos().dist(predict);
         minimum1 += wm.ourPlayer(minimum_player1)->pos().dist(predict);

@@ -19,7 +19,6 @@
 
 #include "neck_offensive_intercept_neck.h"
 
-#define GENERATE_CIRCLE_TO_PREDICT
 #define DLOG_FOR_TARGET_POINT
 
 using namespace rcsc;
@@ -54,7 +53,7 @@ bhv_block::execute(PlayerAgent *agent) {
         }
     }
 
-    if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia))
+    if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia , true))
         return false;
 
     if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().pitchHalfWidth()
@@ -86,9 +85,7 @@ bhv_block::execute(PlayerAgent *agent) {
     ).execute(agent)) {
         Body_TurnToBall().execute(agent);
     }
-//    if (opponent_pass) {
-//        agent->setViewAction(new View_Wide());
-//    }
+
     agent->setNeckAction(new Neck_TurnToBall());
 
     return true;
@@ -97,7 +94,7 @@ bhv_block::execute(PlayerAgent *agent) {
 /*-------------------------------------------------------------------*/
 
 bool
-bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
+bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict , bool draw) {
     const int opp_min = wm.interceptTable()->opponentReachCycle();
 
     int n = 60;
@@ -118,9 +115,9 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
             maxNode = i - n / 4;
         }
     }
-#ifdef GENERATE_CIRCLE_TO_PREDICT
-    dlog.addCircle(Logger::CLEAR, nodes.at(maxNode), 0.2, "blue");
-#endif
+    if(draw) {
+        dlog.addCircle(Logger::CLEAR, nodes.at(maxNode), 0.2, "blue");
+    }
     cycle_opponent++;
 
     double my_speed = 0.92;
@@ -136,7 +133,7 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
         *predict = nodes.at(maxNode);
         return true;
     } else {
-        return doPredict(wm, nodes.at(maxNode), predict);
+        return doPredict(wm, nodes.at(maxNode), predict , draw);
     }
 
 }
@@ -156,25 +153,25 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
     } else if (wm.self().pos().dist(point) <= 8) {
         if (point.absY() < ServerParam::i().penaltyAreaHalfWidth())
             return true;
-        if (abs(wm.self().pos().absY() - point.absY()) < 0.5)
+        if (abs(wm.self().pos().absY() - point.absY()) < 1)
             return true;
         double distY = abs(wm.self().pos().absY() - point.absY());
         distY = min(1.0, distY * 0.10);
         if (!opponent_pass)
         {
-            distY = 1;
+          //  distY = 1;
         }
         if (wm.self().pos().absY() < point.absY()) {
             *rate = point.absY() * distY;
         } else {
             *rate = -point.absY() * distY;
         }
-        *rate -= point.x;
+        *rate -= 2 * point.x;
 
     }
     if (point.absY() > ServerParam::i().pitchHalfWidth() - 1
         || point.absX() > ServerParam::i().pitchHalfLength() - 1) {
-        *rate -= 300;////OUT
+        *rate -= 400;////OUT
     }
 
     return true;
