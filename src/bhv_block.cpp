@@ -57,13 +57,16 @@ bhv_block::execute(PlayerAgent *agent) {
     if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia))
         return false;
 
-    if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().pitchHalfWidth() + 1
-        || wm.ball().inertiaPoint(opp_min).absX() > ServerParam::i().pitchHalfLength() + 1) {
+    if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().pitchHalfWidth()
+        || wm.ball().inertiaPoint(opp_min).absX() > ServerParam::i().pitchHalfLength()) {
         predictInertia = wm.interceptTable()->fastestOpponent()->pos();
     }
 
-    target_point = predictInertia;
-
+    if(wm.ball().pos().dist(target_point) < 8){
+        target_point = (target_point + predictInertia) / 2;
+    } else {
+        target_point = predictInertia;
+    }
     double dash_power = ServerParam::i().maxDashPower();
     double dist_thr = wm.ball().distFromSelf() * 0.1;
     if (dist_thr < 1.0) dist_thr = 1.0;
@@ -125,6 +128,9 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict) {
     int predict_opp_min = opp_min;
     if (opponent_pass) {
         predict_opp_min -= opp_min / 2;
+        if (wm.ball().pos().absY() > ServerParam::i().penaltyAreaHalfWidth()) {
+            predict_opp_min -= opp_min / 3;
+        }
     }
     if (my_cycle <= cycle_opponent + predict_opp_min) {
         *predict = nodes.at(maxNode);
@@ -150,11 +156,14 @@ bhv_block::rateThisPoint(const WorldModel &wm, Vector2D point, double *rate) {
     } else if (wm.self().pos().dist(point) <= 8) {
         if (point.absY() < ServerParam::i().penaltyAreaHalfWidth())
             return true;
-        if (abs(wm.self().pos().absY() - point.absY()) < 1.5)
+        if (abs(wm.self().pos().absY() - point.absY()) < 0.5)
             return true;
         double distY = abs(wm.self().pos().absY() - point.absY());
-        distY = min(1.0, distY * 0.25);
-        distY = 1;
+        distY = min(1.0, distY * 0.10);
+        if (!opponent_pass)
+        {
+            distY = 1;
+        }
         if (wm.self().pos().absY() < point.absY()) {
             *rate = point.absY() * distY;
         } else {
