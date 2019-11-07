@@ -49,6 +49,8 @@
 
 #include "neck_offensive_intercept_neck.h"
 
+#define DLOG_FOR_BLOCKER
+
 using namespace rcsc;
 using namespace std;
 
@@ -92,7 +94,7 @@ Bhv_BasicMove::execute(PlayerAgent *agent) {
         goToFormation(agent);
         return true;
     }
-    if (!isNearestToBallInertia(wm, block)) {
+    if (!haveToBlock(wm, block)) {
         goToFormation(agent);
         return true;
     }
@@ -109,10 +111,12 @@ Bhv_BasicMove::goToFormation(PlayerAgent *agent) {
     const WorldModel &wm = agent->world();
     Vector2D target_point;
     target_point = Strategy::i().getPosition(wm.self().unum());
-    dlog.addText(Logger::CLEAR,
-                 __FILE__": go to formation");
     double dash_power = Strategy::get_normal_dash_power(wm);
     double dist_thr = wm.ball().distFromSelf() * 0.1;
+
+
+    dlog.addText(Logger::CLEAR, __FILE__": go to formation");
+
     if (dist_thr < 1.0) dist_thr = 1.0;
 
     dlog.addText(Logger::TEAM,
@@ -138,7 +142,7 @@ Bhv_BasicMove::goToFormation(PlayerAgent *agent) {
 
 /*-------------------------------------------------------------------*/
 bool
-Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm, bhv_block block) {
+Bhv_BasicMove::haveToBlock(const WorldModel &wm, bhv_block block) {
     const int opp_min = wm.interceptTable()->opponentReachCycle();
     const ServerParam &SP = ServerParam::i();
     Vector2D goal = Vector2D(-SP.pitchHalfLength(), 0);
@@ -151,7 +155,7 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm, bhv_block block) {
             continue;
 
         double m = wm.ourPlayer(i)->pos().dist(ball);
-        m += wm.ourPlayer(i)->pos().x /2.5;
+        m += wm.ourPlayer(i)->pos().x / 2.5;
         if (ball.absY() < SP.penaltyAreaHalfWidth() && ball.x < (-SP.pitchHalfLength() + SP.penaltyAreaLength())) {
             m += wm.ourPlayer(i)->pos().dist(goal);
         }
@@ -169,39 +173,33 @@ Bhv_BasicMove::isNearestToBallInertia(const WorldModel &wm, bhv_block block) {
         double m = wm.ourPlayer(i)->pos().dist(ball);
         m += wm.ourPlayer(i)->pos().x / 2.5;
         if (ball.absY() < SP.penaltyAreaHalfWidth() && ball.x < (-SP.pitchHalfLength() + SP.penaltyAreaLength())) {
-            m += wm.ourPlayer(i)->pos().dist(goal);
+        //    m += wm.ourPlayer(i)->pos().dist(goal);
         }
         if (m < minimum1 && m > minimum) {
             minimum1 = m;
             minimum_player1 = i;
         }
     }
-    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player, minimum);
-    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1, minimum1);
-
-    if(wm.self().unum() != minimum_player && wm.self().unum() != minimum_player1)
+    if (wm.self().unum() != minimum_player && wm.self().unum() != minimum_player1)
         return false;
 
     if (abs(minimum - minimum1) < 5) {
         Vector2D predict;
-        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict , false))
+        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict, false))
             return false;
         minimum += wm.ourPlayer(minimum_player)->pos().dist(predict);
         minimum1 += wm.ourPlayer(minimum_player1)->pos().dist(predict);
-        dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player, minimum);
-        dlog.addText(Logger::CLEAR, __FILE__"must be block: %d = %f", minimum_player1, minimum1);
-        if (abs(minimum - minimum1) < 2.5) {
-            double dist_goal1 = wm.ourPlayer(minimum_player1)->pos().dist(goal);
-            double dist_goal = wm.ourPlayer(minimum_player)->pos().dist(goal);
-            if(minimum_player1 < minimum_player){
+
+        if (abs(minimum - minimum1) < 5) {
+            if (minimum_player1 < minimum_player) {
                 minimum_player = minimum_player1;
             }
-        }else if(minimum1 < minimum){
+        } else if (minimum1 < minimum) {
             minimum_player = minimum_player1;
         }
     }
-
-    dlog.addText(Logger::CLEAR, __FILE__"realy must be block: %d", minimum_player);
-
+#ifdef DLOG_FOR_BLOCKER
+    dlog.addText(Logger::CLEAR, __FILE__"must be block: %d", minimum_player);
+#endif
     return minimum_player == wm.self().unum();
 }

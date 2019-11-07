@@ -44,7 +44,7 @@ private:
 
     void goToFormation(rcsc::PlayerAgent *agent);
 
-    bool isNearestToBallInertia(const rcsc::WorldModel &wm , bhv_block block);
+    bool haveToBlock(const rcsc::WorldModel &wm , bhv_block block);
 };
 
 #endif
