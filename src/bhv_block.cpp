@@ -48,16 +48,13 @@ bhv_block::execute(PlayerAgent *agent) {
     int real_opp_min = opp_min;
     if (opponent_pass) {
         real_opp_min += opp_min / 2;
-        if (opp_min > 4) {
-            real_opp_min -= 1;
-        }
     }
 
     if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia, true))
         return false;
 
-    if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().pitchHalfWidth()
-        || wm.ball().inertiaPoint(opp_min).absX() > ServerParam::i().pitchHalfLength()) {
+    if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().pitchHalfWidth() - 1
+        || wm.ball().inertiaPoint(opp_min).absX() > ServerParam::i().pitchHalfLength() - 1) {
         predictInertia = wm.ball().inertiaPoint(opp_min);
     }
 
@@ -87,7 +84,7 @@ bhv_block::execute(PlayerAgent *agent) {
     }
 
     if (wm.existKickableOpponent()
-        && wm.ball().distFromSelf() < 18.0) {
+        || wm.ball().distFromSelf() < 18.0) {
         agent->setNeckAction(new Neck_TurnToBall());
     } else {
         agent->setNeckAction(new Neck_TurnToBallOrScan());
@@ -128,11 +125,11 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict, b
     double my_cycle = wm.self().pos().dist(nodes.at(maxNode)) / my_speed;
     int predict_opp_min = opp_min;
     if (opponent_pass) {
-        predict_opp_min -= opp_min / 2;
-        if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().penaltyAreaHalfWidth() &&
-            wm.ball().inertiaPoint(opp_min).x < 0) {
-            predict_opp_min -= 3;
-        }
+        predict_opp_min -= (opp_min + 1) / 2;
+    }
+    if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().penaltyAreaHalfWidth() &&
+        wm.ball().inertiaPoint(opp_min).x < -20 && wm.self().distFromBall()>5) {
+        predict_opp_min -= 3;
     }
     if (my_cycle <= cycle_opponent + predict_opp_min) {
         *predict = nodes.at(maxNode);

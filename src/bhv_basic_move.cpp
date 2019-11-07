@@ -183,14 +183,16 @@ Bhv_BasicMove::haveToBlock(const WorldModel &wm, bhv_block block) {
     if (wm.self().unum() != minimum_player && wm.self().unum() != minimum_player1)
         return false;
 
-    if (abs(minimum - minimum1) < 5) {
+    if (abs(minimum - minimum1) < 2.5) {
         Vector2D predict;
         if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict, false))
             return false;
         minimum += wm.ourPlayer(minimum_player)->pos().dist(predict);
         minimum1 += wm.ourPlayer(minimum_player1)->pos().dist(predict);
+        dlog.addText(Logger::CLEAR, __FILE__"must be block: %d , %f", minimum_player , minimum);
+        dlog.addText(Logger::CLEAR, __FILE__"must be block: %d , %f", minimum_player1 , minimum1);
 
-        if (abs(minimum - minimum1) < 5) {
+        if (abs(minimum - minimum1) < 6.5) {
             if (minimum_player1 < minimum_player) {
                 minimum_player = minimum_player1;
             }
