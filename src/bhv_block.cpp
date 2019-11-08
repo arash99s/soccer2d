@@ -31,7 +31,7 @@ bhv_block::execute(PlayerAgent *agent) {
     opponent_pass = false;
     static Vector2D target_point;
     PlayerObject fastest_opponent = *wm.interceptTable()->fastestOpponent();
-    Vector2D predict, predictInertia;
+    Vector2D predictInertia;
 
     dlog.addText(Logger::CLEAR, __FILE__" opp_min is : %d", opp_min);
 
@@ -44,12 +44,15 @@ bhv_block::execute(PlayerAgent *agent) {
     if (wm.ball().pos().x > fastest_opponent.pos().x + 1) {
         opponent_pass = true;
     }
+    if(abs(wm.ball().pos().y - fastest_opponent.pos().y) > 6){
+        opponent_pass = true;
+    }
 
     int real_opp_min = opp_min;
     if (opponent_pass) {
         real_opp_min += opp_min / 2;
     }
-
+    //initialize predictInertia
     if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia, true))
         return false;
 
