@@ -90,7 +90,7 @@ Bhv_BasicMove::execute(PlayerAgent *agent) {
         return true;
     }
     bhv_block block;
-    if (wm.existKickableTeammate() || mate_min < opp_min + 1) {//////////ball is our
+    if (wm.existKickableTeammate() || mate_min < opp_min ) {//////////ball is our
         goToFormation(agent);
         return true;
     }
@@ -172,9 +172,6 @@ Bhv_BasicMove::haveToBlock(const WorldModel &wm, bhv_block block) {
 
         double m = wm.ourPlayer(i)->pos().dist(ball);
         m += wm.ourPlayer(i)->pos().x / 2.5;
-        if (ball.absY() < SP.penaltyAreaHalfWidth() && ball.x < (-SP.pitchHalfLength() + SP.penaltyAreaLength())) {
-        //    m += wm.ourPlayer(i)->pos().dist(goal);
-        }
         if (m < minimum1 && m > minimum) {
             minimum1 = m;
             minimum_player1 = i;
@@ -184,15 +181,17 @@ Bhv_BasicMove::haveToBlock(const WorldModel &wm, bhv_block block) {
         return false;
 
     if (abs(minimum - minimum1) < 4) {
-        Vector2D predict;
-        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict, false))
+        Vector2D predict , predict1;
+        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict , minimum_player , false))
             return false;
-        minimum += wm.ourPlayer(minimum_player)->pos().dist(predict);
-        minimum1 += wm.ourPlayer(minimum_player1)->pos().dist(predict);
+        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict1 , minimum_player1 , false))
+            return false;
+        minimum += wm.ourPlayer(minimum_player)->pos().dist(predict1);
+        minimum1 += wm.ourPlayer(minimum_player1)->pos().dist(predict1);
         dlog.addText(Logger::CLEAR, __FILE__"must be block: %d , %f", minimum_player , minimum);
         dlog.addText(Logger::CLEAR, __FILE__"must be block: %d , %f", minimum_player1 , minimum1);
 
-        if (abs(minimum - minimum1) < 2) {
+        if (abs(minimum - minimum1) < 4) {
             if (minimum_player1 < minimum_player) {
                 minimum_player = minimum_player1;
             }

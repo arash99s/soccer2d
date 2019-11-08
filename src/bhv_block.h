@@ -16,7 +16,7 @@ public:
 
     bool execute(rcsc::PlayerAgent *agent);
 
-    bool doPredict(const rcsc::WorldModel &wm, rcsc::Vector2D center, rcsc::Vector2D *predict, bool draw);
+    bool doPredict(const rcsc::WorldModel &wm, rcsc::Vector2D center, rcsc::Vector2D *predict , int unum, bool draw);
 
 
 private:

@@ -53,7 +53,7 @@ bhv_block::execute(PlayerAgent *agent) {
         real_opp_min += opp_min / 2;
     }
     //initialize predictInertia
-    if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia, true))
+    if (!doPredict(wm, wm.ball().inertiaPoint(real_opp_min), &predictInertia, wm.self().unum(), true))
         return false;
 
     if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().pitchHalfWidth() - 1
@@ -97,15 +97,16 @@ bhv_block::execute(PlayerAgent *agent) {
 /*-------------------------------------------------------------------*/
 
 bool
-bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict, bool draw) {
+bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict, int unum , bool draw) {
     const int opp_min = wm.interceptTable()->opponentReachCycle();
-
     int n = 60;
     vector<Vector2D> nodes;
     double alfa = 360.0 / n;
     double maxRate = -1000;
     int maxNode = 0;
 
+    if(wm.ourPlayer(unum) == NULL)
+        return false;
     for (int i = n / 4; i <= (3 * n) / 4; i++) {
         nodes.push_back(Vector2D(center.x, center.y) + Vector2D::polar2vector(0.7, i * alfa));
         double rate;
@@ -124,20 +125,20 @@ bhv_block::doPredict(const WorldModel &wm, Vector2D center, Vector2D *predict, b
     cycle_opponent++;
 
     double my_speed = 0.92;
-    double my_cycle = wm.self().pos().dist(nodes.at(maxNode)) / my_speed;
+    double my_cycle = wm.ourPlayer(unum)->pos().dist(nodes.at(maxNode)) / my_speed;
     int predict_opp_min = opp_min;
     if (opponent_pass) {
         predict_opp_min -= (opp_min + 1) / 2;
     }
     if (wm.ball().inertiaPoint(opp_min).absY() > ServerParam::i().penaltyAreaHalfWidth() &&
-        wm.ball().inertiaPoint(opp_min).x < -20 && wm.self().distFromBall()>5) {
+        wm.ball().inertiaPoint(opp_min).x < -20 && wm.ourPlayer(unum)->distFromBall()>5) {
         predict_opp_min -= 3;
     }
     if (my_cycle <= cycle_opponent + predict_opp_min) {
         *predict = nodes.at(maxNode);
         return true;
     } else {
-        return doPredict(wm, nodes.at(maxNode), predict, draw);
+        return doPredict(wm, nodes.at(maxNode), predict, unum , draw);
     }
 
 }
