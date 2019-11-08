@@ -86,11 +86,10 @@ bhv_block::execute(PlayerAgent *agent) {
         Body_TurnToBall().execute(agent);
     }
 
-    if (wm.existKickableOpponent()
-        || wm.ball().distFromSelf() < 18.0) {
+    if(opponent_pass) {
+        agent->setNeckAction(new Neck_TurnToPoint(target_point));
+    }else{
         agent->setNeckAction(new Neck_TurnToBall());
-    } else {
-        agent->setNeckAction(new Neck_TurnToBallOrScan());
     }
     return true;
 }
