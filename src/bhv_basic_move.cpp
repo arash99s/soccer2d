@@ -90,7 +90,7 @@ Bhv_BasicMove::execute(PlayerAgent *agent) {
         return true;
     }
     bhv_block block;
-    if (wm.existKickableTeammate() || mate_min < opp_min ) {//////////ball is our
+    if (wm.existKickableTeammate() || mate_min < opp_min) {//////////ball is our
         goToFormation(agent);
         return true;
     }
@@ -141,6 +141,9 @@ Bhv_BasicMove::goToFormation(PlayerAgent *agent) {
 }
 
 /*-------------------------------------------------------------------*/
+/*..
+ * this method show that if this player have to block or not
+ */
 bool
 Bhv_BasicMove::haveToBlock(const WorldModel &wm, bhv_block block) {
     const int opp_min = wm.interceptTable()->opponentReachCycle();
@@ -180,16 +183,14 @@ Bhv_BasicMove::haveToBlock(const WorldModel &wm, bhv_block block) {
     if (wm.self().unum() != minimum_player && wm.self().unum() != minimum_player1)
         return false;
 
-    if (abs(minimum - minimum1) < 4) {
-        Vector2D predict , predict1;
-        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict , minimum_player , false))
+    if (abs(minimum - minimum1) < 2) {
+        Vector2D predict, predict1;
+        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict, minimum_player, false))
             return false;
-        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict1 , minimum_player1 , false))
+        if (!block.doPredict(wm, wm.ball().inertiaPoint(opp_min), &predict1, minimum_player1, false))
             return false;
         minimum += wm.ourPlayer(minimum_player)->pos().dist(predict1);
         minimum1 += wm.ourPlayer(minimum_player1)->pos().dist(predict1);
-        dlog.addText(Logger::CLEAR, __FILE__"must be block: %d , %f", minimum_player , minimum);
-        dlog.addText(Logger::CLEAR, __FILE__"must be block: %d , %f", minimum_player1 , minimum1);
 
         if (abs(minimum - minimum1) < 4) {
             if (minimum_player1 < minimum_player) {
